@@ -84,3 +84,54 @@ class TextNode:
                 if len(text) > 0:
                     new_nodes.append(TextNode(text, "text"))
         return new_nodes
+
+    def markdown_to_blocks(markdown):
+        blocks = markdown.split('\n')
+        new_blocks = []
+        current_block = ""
+        for block in blocks:
+            if block == "":
+                if current_block != "":
+                    new_blocks.append(current_block[:-1])
+                    current_block = ""
+            else:
+                current_block += block.lstrip().rstrip() + "\n"
+        if current_block != "":
+            new_blocks.append(current_block[:-1])
+        return new_blocks
+
+    def block_to_block_type(block):
+        count_h = 0
+        while block[count_h] == '#':
+            count_h += 1
+        if count_h > 0 and count_h < 7 and block[count_h] == " ":
+            return "header"
+
+        if block[0:3] == "```" and block[-3:] == "```":
+            return "code"
+
+        quote = True
+        unordered = True
+        ordered = True
+        item = 0
+        for line in block.split("\n"):
+            item += 1
+            if line[0] != ">":
+                quote = False
+            if line[1] != " " or (line[0] != "*" and line[0] != "-"):
+                unordered = False
+            count = 0
+            while line[count].isnumeric():
+                count += 1
+
+            ev = not line[0].isnumeric() or line[count] != "." or int(line[0:count]) != item
+            if ev:
+                ordered = False
+        if quote:
+            return "quote"
+        if unordered:
+            return "unordered_list"
+        if ordered:
+            return "ordered_list"
+
+        return "paragraph"

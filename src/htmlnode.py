@@ -51,7 +51,7 @@ class LeafNode(HTMLNode):
             for prop in self.props:
                 if prop[0] == "href":
                     return f"<a {super().props_to_html()}>{self.value}</a>"
-        if self.tag == "b" or self.tag == "i" or self.tag == "p" or self.tag == "code":
+        if self.tag == "b" or self.tag == "i" or self.tag == "p" or self.tag == "code" or self.tag == "li":
             return f"<{self.tag}>{self.value}</{self.tag}>"
         return "Error!"
 

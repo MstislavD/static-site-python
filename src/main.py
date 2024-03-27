@@ -71,8 +71,12 @@ def test_block_types():
 
 def test_html_node():
     text = "This is **bold** text, and this is *italic* text, and finally a `code` text"
+    text += "\n\n# heading"
+    text += "\n\n## heading with a [link](https://www.example.com)"
+    text += "\n\n###### heading with **bold** and **italic** text"
     text += "\n\n> quote line 1\n> quote line 2\n> quote **line 3**"
     text += "\n\n* item\n* item"
+    text += "\n\n1. item\n2. item\n 3. item"
     blocks = TextNode.markdown_to_blocks(text)
     for block in blocks:
         block_type = TextNode.block_to_block_type(block)
@@ -85,6 +89,8 @@ def test_html_node():
             html = html_list_node(block, "ul")
         elif block_type == "ordered_list":
             html = html_list_node(block, "ol")
+        elif block_type == "header":
+            html = html_node_heading(block)
         if html:
             print(html.to_html())
 
@@ -96,7 +102,20 @@ def html_node(block, tag):
     return parent
 
 def html_list_node(block, tag):
-    raise NotImplementedError()
+    leafs = []
+    for line in block.split("\n"):
+        node = LeafNode("li", line)
+        leafs.append(node)
+    parent = ParentNode(tag, leafs)
+    return parent
 
+def html_node_heading(block):
+    leafs = []
+    count = 0
+    while block[count] == "#":
+        count += 1
+    block = block[count:].lstrip()
+    tag = f"h{count}"
+    return html_node(block, tag)
 
 main()

@@ -32,7 +32,7 @@ class HTMLNode:
         if (text_node.text_type == "link"):
             return LeafNode("a", text_node.text, {("href", text_node.url)})
         if (text_node.text_type == "image"):
-            return LeafNode("img", "", {("src", text_node.url), ("alt", text_node.text)})
+            return LeafNode("img", " ", {("src", text_node.url), ("alt", text_node.text)})
 
 
     def __repr__(self):
@@ -47,10 +47,10 @@ class LeafNode(HTMLNode):
             raise ValueError("Value not provided")
         if not self.tag:
             return f"{self.value}"
-        if self.tag == "a":
-            for prop in self.props:
-                if prop[0] == "href":
-                    return f"<a {super().props_to_html()}>{self.value}</a>"
+        if self.tag == "a" or self.tag == "img":
+            return f"<{self.tag} {super().props_to_html()}>{self.value}</{self.tag}>"
+        
+
         if self.tag == "b" or self.tag == "i" or self.tag == "p" or self.tag == "code" or self.tag == "li":
             return f"<{self.tag}>{self.value}</{self.tag}>"
         return "Error!"

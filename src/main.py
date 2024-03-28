@@ -12,7 +12,8 @@ def main():
     #test_html_node()
 
     copy_folder("static", "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    #generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 def test_text_to_nodes():
     text = "This is **bold** text, and this is *italic* text, and finally a `code` text"
@@ -110,7 +111,7 @@ def text_to_html(text):
         if block_type == "paragraph":
             html = html_node(block, "p")
         elif block_type == "quote":
-            html = html_node(block, "blockquote")
+            html = html_quote(block)
         elif block_type == "unordered_list":
             html = html_list_node(block, "ul")
         elif block_type == "ordered_list":
@@ -126,6 +127,15 @@ def html_node(block, tag):
     for node in TextNode.text_to_nodes(block):
         leafs.append(HTMLNode.text_node_to_html_node(node))
     parent = ParentNode(tag, leafs)
+    return parent
+
+def html_quote(block):
+    leafs = []
+    for line in block.split("\n"):
+        stripped_line = line[1:].lstrip() + " "
+        for node in TextNode.text_to_nodes(stripped_line):
+            leafs.append(HTMLNode.text_node_to_html_node(node))
+    parent = ParentNode("blockquote", leafs)
     return parent
 
 def html_list_node(block, tag):
@@ -191,8 +201,22 @@ def generate_page(from_path, template_path, dest_path):
     
     with open(dest_path, "w") as file:
         file.write(html_file)
-
     return
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_content):
+    print(f"looking for md files in {dir_path_content}")
+    if not os.path.exists(dest_dir_content):
+        os.mkdir(dest_dir_content)
+
+    for path in os.listdir(dir_path_content):
+        old_path = os.path.join(dir_path_content, path)
+        new_path = os.path.join(dest_dir_content, path)
+        if os.path.isfile(old_path) and old_path[-3:] == ".md":
+            new_path = new_path[:-3] + ".html"
+            generate_page(old_path, template_path, new_path)
+        else:
+            generate_pages_recursive(old_path, template_path, new_path)
+
         
 
 
